@@ -1,0 +1,91 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log* # For pnpm users
+.npm
+.eslintcache
+.parcel-cache
+.node_repl_history
+
+# Dependency directories
+jspm_packages/
+bower_components/
+
+# Production build output
+studyonic/build/
+studyonic/dist/
+studyonic/out/
+.next/
+.nuxt/
+.vite/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+.env.development
+.env.test
+.env.production
+
+# Sensitive files
+*.key
+*.pem
+*.pfx
+*.jks
+*.cer
+*.crt
+*.csr
+*.enc
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Diagnostic reports
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directories
+coverage/
+.nyc_output/
+*.lcov
+
+# Editor files
+.project
+.classpath
+.settings/
+
+# OS generated files
+.Trash-*
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# Yarn Integrity file
+.yarn-integrity
+
+# temporary or cache files
+tmp/
+temp/
+*.tmp
+*.swp
+*.bak
+*.swo
+
+*.sqlite
+*.db
+*.sqlite3
