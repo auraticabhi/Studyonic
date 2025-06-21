@@ -94,7 +94,7 @@ jobs:
             echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
             
             echo "Starting application stack with latest images"
-            docker compose up -d --pull=always --remove-orphans
+            docker compose up -d --build --force-recreate --pull=always --remove-orphans
             
             echo "Pruning old Docker images"
             docker image prune -af
