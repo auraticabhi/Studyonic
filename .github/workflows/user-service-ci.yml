@@ -62,19 +62,29 @@ jobs:
             set -e
             export PROJ_DIR=/home/ubuntu/studyonic
             
-            if [ ! -d "$PROJ_DIR" ]; then
-              git clone https://github.com/${{ github.repository }}.git $PROJ_DIR
-              cd $PROJ_DIR
-            else
-              cd $PROJ_DIR
-              git reset --hard
-              git pull origin main
+            if [ ! -d "$PROJ_DIR/.git" ]; then
+              echo "Cloning repository for the first time"
+              git clone https://github.com/${{ github.repository }}.git /tmp/repo-temp
+              mkdir -p $PROJ_DIR
+              mv /tmp/repo-temp/* $PROJ_DIR/
+              mv /tmp/repo-temp/.git* $PROJ_DIR/
+              rm -rf /tmp/repo-temp
             fi
+            
+            cd $PROJ_DIR
+            
+            echo "Repository exists, pulling latest changes"
+            git reset --hard
+            git pull origin main
           
+            echo "Logging in to Docker Hub"
             echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
             
+            echo "Starting application stack with latest images"
             docker compose up -d --pull=always --remove-orphans
             
+            echo "Pruning old Docker images"
             docker image prune -af
             
+            echo "Deployment successful! Listing running containers:"
             docker ps
