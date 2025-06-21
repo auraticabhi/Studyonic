@@ -13,20 +13,13 @@ services:
     volumes:
       - zookeeper-data:/var/lib/zookeeper/data
       - zookeeper-logs:/var/lib/zookeeper/log
-    healthcheck:
-      test: "echo 'imok' | nc localhost 2181"
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
     restart: unless-stopped
 
   kafka:
     image: confluentinc/cp-kafka:7.4.0
     container_name: kafka
     hostname: kafka
-    depends_on:
-      zookeeper: { condition: service_healthy }
+    depends_on: [zookeeper]
     networks: [edtech-network]
     ports: ["9092:9092", "29092:29092"]
     environment:
@@ -38,12 +31,6 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 3000
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
-    healthcheck:
-      test: "kafka-topics --bootstrap-server kafka:29092 --list"
-      interval: 15s
-      timeout: 10s
-      retries: 5
-      start_period: 15s
     restart: unless-stopped
 
   redis:
@@ -55,9 +42,9 @@ services:
     command: redis-server --save 60 1 --loglevel warning
     volumes:
       - redis-data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
+    # healthcheck:
+    #   test: ["CMD", "redis-cli", "ping"]
+    #   interval: 5s
     restart: unless-stopped
 
   # APPLICATION SERVICES
@@ -66,71 +53,46 @@ services:
     build: ./api-gateway
     container_name: api-gateway
     hostname: api-gateway
-    depends_on:
-      user-service: { condition: service_healthy }
-      course-service: { condition: service_healthy }
-      payment-service: { condition: service_healthy }
-      notification-service: { condition: service_healthy }
+    depends_on: [user-service, course-service, payment-service, notification-service]
     networks: [edtech-network]
     ports: ["8000:8000"]
     env_file: [".env.prod"]
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
     restart: unless-stopped
 
   user-service:
     build: ./user-service
     container_name: user-service
     hostname: user-service
-    depends_on:
-      kafka: { condition: service_started }
-      redis: { condition: service_healthy }
+    depends_on: [kafka, redis]
     networks: [edtech-network]
     env_file: [".env.prod"]
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
-      interval: 30s
     restart: unless-stopped
     
   course-service:
     build: ./course-service
     container_name: course-service
     hostname: course-service
-    depends_on:
-      kafka: { condition: service_started }
-      redis: { condition: service_healthy }
+    depends_on: [kafka, redis]
     networks: [edtech-network]
     env_file: [".env.prod"]
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
-      interval: 30s
     restart: unless-stopped
       
   payment-service:
     build: ./payment-service
     container_name: payment-service
     hostname: payment-service
-    depends_on:
-      kafka: { condition: service_started }
+    depends_on: [kafka]
     networks: [edtech-network]
     env_file: [".env.prod"]
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
-      interval: 30s
     restart: unless-stopped
       
   notification-service:
     build: ./notification-service
     container_name: notification-service
     hostname: notification-service
-    depends_on:
-      kafka: { condition: service_started }
+    depends_on: [kafka]
     networks: [edtech-network]
     env_file: [".env.prod"]
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8004/health"]
-      interval: 30s
     restart: unless-stopped
 
 # --- NETWORKS & VOLUMES ---

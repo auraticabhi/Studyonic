@@ -1,0 +1,56 @@
+name: CD - Deploy to Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'
+        required: true
+        default: 'warning'
+        type: choice
+        options:
+        - info
+        - warning
+        - debug
+
+jobs:
+  deploy-stack:
+    name: Deploy Full Stack to EC2
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to AWS EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PROD_SERVER_HOST }}
+          username: ${{ secrets.PROD_SERVER_USERNAME }}
+          key: ${{ secrets.PROD_SERVER_SSH_KEY }}
+          script: |
+            set -e
+            export PROJ_DIR=/home/ubuntu/studyonic
+            
+            echo "Navigating to project directory"
+            cd $PROJ_DIR || git clone https://github.com/${{ github.repository }}.git $PROJ_DIR && cd $PROJ_DIR
+            
+            echo "Updating repository to the latest version of main"
+            git fetch origin
+            git reset --hard origin/main
+            git pull origin main
+
+            echo "Logging in to Docker Hub"
+            echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+
+            echo "Pulling all latest service images from Docker Hub"
+            docker compose pull
+
+            echo "Starting application stack with new images"
+            docker compose up -d --force-recreate --remove-orphans
+
+            echo "Pruning old Docker images to save space"
+            docker image prune -af
+
+            echo "Deployment successful! Current running containers:"
+            docker ps
