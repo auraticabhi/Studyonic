@@ -79,6 +79,16 @@ jobs:
 
             echo "Stopping and removing existing Docker containers (if any)"
             docker compose down --remove-orphans || true
+
+            docker stop redis || true
+            docker rm redis || true
+            docker stop zookeeper || true
+            docker rm zookeeper || true
+            docker stop kafka || true
+            docker rm kafka || true
+
+            docker container prune -f || true
+            docker network prune -f || true
           
             echo "Logging in to Docker Hub"
             echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
