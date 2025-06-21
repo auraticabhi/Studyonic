@@ -76,6 +76,9 @@ jobs:
             echo "Repository exists, pulling latest changes"
             git reset --hard
             git pull origin main
+
+            echo "Stopping and removing existing Docker containers (if any)"
+            docker compose down --remove-orphans || true
           
             echo "Logging in to Docker Hub"
             echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
