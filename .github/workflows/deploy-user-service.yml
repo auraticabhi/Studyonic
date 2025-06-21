@@ -32,8 +32,3 @@ jobs:
           # Push the image to the registry after building
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/user-service:latest, ${{ secrets.DOCKERHUB_USERNAME }}/user-service:${{ github.sha }}
-
-      //         docker pull ${{ secrets.DOCKERHUB_USERNAME }}/user-service:latest
-      //         docker stop user-service-container || true
-      //         docker rm user-service-container || true
-      //         docker run -d --name user-service-container -p 8001:8001 ${{ secrets.DOCKERHUB_USERNAME }}/user-service:latest
