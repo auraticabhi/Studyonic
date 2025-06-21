@@ -1,5 +1,4 @@
-# CI/CD Pipeline for the User Service
-name: CI - User Service
+name: CI/CD - User Service
 
 on:
   push:
@@ -16,30 +15,23 @@ jobs:
       run:
         working-directory: ./user-service
     steps:
-      # Step 1: Check out repository's code
       - name: Checkout Repository
         uses: actions/checkout@v4
-      # Step 2: Set up Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-      # Step 3: Install Dependencies
       - name: Install Dependencies
         run: npm install
-      # Step 4: Run Tests
       # - name: Run Tests
       #   run: npm test
-      # Step 5: Log in to Docker Hub
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      # Step 6: Set up Docker Buildx
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      # Step 7: Build and Push Docker Image
       - name: Build and push to Docker Hub
         uses: docker/build-push-action@v5
         with:
@@ -51,3 +43,34 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/user-service:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to AWS EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PROD_SERVER_HOST }}
+          username: ${{ secrets.PROD_SERVER_USERNAME }}
+          key: ${{ secrets.PROD_SERVER_SSH_KEY }}
+          script: |
+            cd /home/ubuntu/studyonic || (mkdir -p /home/ubuntu/studyonic && cd /home/ubuntu/studyonic)
+            
+            if [ -d .git ]; then
+              git pull origin main;
+            else
+              git clone https://github.com/${{ github.repository }}.git . ;
+            fi
+
+            echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+            
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/user-service:latest
+            
+            docker-compose up -d --no-deps --remove-orphans user-service
+            
+            docker image prune -af
