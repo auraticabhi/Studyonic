@@ -45,3 +45,38 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/course-service:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to AWS EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PROD_SERVER_HOST }}
+          username: ${{ secrets.PROD_SERVER_USERNAME }}
+          key: ${{ secrets.PROD_SERVER_SSH_KEY }}
+          script: |
+            export PROJ_DIR=/home/ubuntu/studyonic
+            
+            mkdir -p $PROJ_DIR
+            cd $PROJ_DIR
+
+            if [ ! -d ".git" ]; then
+              git clone https://github.com/${{ github.repository }}.git .
+            else
+              git reset --hard
+              git pull origin main
+            fi
+
+            echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+            
+            docker-compose pull
+            
+            docker-compose up -d --remove-orphans
+            
+            docker image prune -af

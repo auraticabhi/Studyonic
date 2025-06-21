@@ -49,7 +49,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Deploy to AWS EC2
@@ -59,18 +59,22 @@ jobs:
           username: ${{ secrets.PROD_SERVER_USERNAME }}
           key: ${{ secrets.PROD_SERVER_SSH_KEY }}
           script: |
-            cd /home/ubuntu/studyonic || (mkdir -p /home/ubuntu/studyonic && cd /home/ubuntu/studyonic)
+            export PROJ_DIR=/home/ubuntu/studyonic
             
-            if [ -d .git ]; then
-              git pull origin main;
+            mkdir -p $PROJ_DIR
+            cd $PROJ_DIR
+
+            if [ ! -d ".git" ]; then
+              git clone https://github.com/${{ github.repository }}.git .
             else
-              git clone https://github.com/${{ github.repository }}.git . ;
+              git reset --hard
+              git pull origin main
             fi
 
             echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
             
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/user-service:latest
+            docker-compose pull
             
-            docker-compose up -d --no-deps --remove-orphans user-service
+            docker-compose up -d --remove-orphans
             
             docker image prune -af
