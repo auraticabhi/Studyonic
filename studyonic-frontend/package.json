@@ -6,6 +6,7 @@
         "@ramonak/react-progress-bar": "^5.0.3",
         "@reduxjs/toolkit": "^1.9.5",
         "axios": "^1.4.0",
+        "axios-retry": "^4.5.0",
         "concurrently": "^8.2.0",
         "copy-to-clipboard": "^3.3.3",
         "dotenv": "^16.3.1",
