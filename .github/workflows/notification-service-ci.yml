@@ -63,18 +63,20 @@ jobs:
           script: |
             set -e
             export PROJ_DIR=/home/ubuntu/studyonic
-            mkdir -p $PROJ_DIR && cd $PROJ_DIR
-            if [ ! -d ".git" ]; then
-              git clone https://github.com/${{ github.repository }}.git .
+            
+            if [ ! -d "$PROJ_DIR" ]; then
+              git clone https://github.com/${{ github.repository }}.git $PROJ_DIR
+              cd $PROJ_DIR
             else
-              git reset --hard && git pull origin main
+              cd $PROJ_DIR
+              git reset --hard
+              git pull origin main
             fi
+          
             echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
-            echo "Pulling latest images"
-            docker compose pull
-            echo "Starting application stack"
-            docker compose up -d --remove-orphans
-            echo "Pruning old images"
+            
+            docker compose up -d --pull=always --remove-orphans
+            
             docker image prune -af
-            echo "Deployment successful"
+            
             docker ps
