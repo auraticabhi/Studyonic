@@ -120,6 +120,15 @@ services:
       timeout: 10s
       retries: 3
 
+  frontend:
+    build: ./studyonic-frontend
+    container_name: frontend
+    depends_on: [api-gateway]
+    networks: [edtech-network]
+    ports:
+      - "80:80"
+    restart: always
+
 # --- NETWORKS & VOLUMES ---
 networks:
   edtech-network:

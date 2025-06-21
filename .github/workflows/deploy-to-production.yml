@@ -13,9 +13,23 @@ on:
         - warning
         - debug
 
+  workflow_run:
+    workflows: 
+      - "CI - Build User Service"
+      - "CI - Build Course Service"
+      - "CI - Build Payment Service"
+      - "CI - Build Notification Service"
+      - "CI - Build API Gateway"
+      - "CI - Build Frontend"
+    types:
+      - completed
+    branches:
+      - main
+
 jobs:
   deploy-stack:
     name: Deploy Full Stack to EC2
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
     steps:
