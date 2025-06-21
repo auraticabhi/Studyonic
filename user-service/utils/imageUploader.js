@@ -1,3 +1,4 @@
+// for uploading profile pics and other user data
 const cloudinary = require('cloudinary').v2
 
 exports.uploadImageToCloudinary = async(file, folder, height, quality) => {
