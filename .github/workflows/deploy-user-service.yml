@@ -1,0 +1,39 @@
+# GitHub Actions CI/CD Workflow for the User Service
+name: CI/CD - User Service
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'user-service/**'
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checks-out the repository under $GITHUB_WORKSPACE, so job can access it
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Step 2: Log in to Docker Hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Step 3: Build the Docker image and push it to Docker Hub
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          # The context is the directory where the Dockerfile is located
+          context: ./user-service
+          # Push the image to the registry after building
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/user-service:latest, ${{ secrets.DOCKERHUB_USERNAME }}/user-service:${{ github.sha }}
+
+      //         docker pull ${{ secrets.DOCKERHUB_USERNAME }}/user-service:latest
+      //         docker stop user-service-container || true
+      //         docker rm user-service-container || true
+      //         docker run -d --name user-service-container -p 8001:8001 ${{ secrets.DOCKERHUB_USERNAME }}/user-service:latest
