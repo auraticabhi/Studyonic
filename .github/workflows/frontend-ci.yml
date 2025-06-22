@@ -37,7 +37,7 @@ jobs:
       - name: Build Production Application
         env:
           NODE_OPTIONS: "--max-old-space-size=4096"
-        run: npm run build
+        run: CI=false npm run build
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
