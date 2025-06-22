@@ -50,7 +50,7 @@ services:
   # APPLICATION SERVICES
   
   api-gateway:
-    image: ${{ secrets.DOCKERHUB_USERNAME }}/api-gateway:latest 
+    image: ${DOCKER_USERNAME}/api-gateway:latest
     # build: ./api-gateway
     container_name: api-gateway
     hostname: api-gateway
@@ -66,7 +66,7 @@ services:
       retries: 3
 
   user-service:
-    image: ${{ secrets.DOCKERHUB_USERNAME }}/user-service:latest
+    image: ${DOCKER_USERNAME}/user-service:latest
     # build: ./user-service
     container_name: user-service
     hostname: user-service
@@ -81,7 +81,7 @@ services:
       retries: 3
     
   course-service:
-    image: ${{ secrets.DOCKERHUB_USERNAME }}/course-service:latest
+    image: ${DOCKER_USERNAME}/course-service:latest
     # build: ./course-service
     container_name: course-service
     hostname: course-service
@@ -96,7 +96,7 @@ services:
       retries: 3
       
   payment-service:
-    image: ${{ secrets.DOCKERHUB_USERNAME }}/payment-service:latest
+    image: ${DOCKER_USERNAME}/payment-service:latest
     # build: ./payment-service
     container_name: payment-service
     hostname: payment-service
@@ -111,7 +111,7 @@ services:
       retries: 3
       
   notification-service:
-    image: ${{ secrets.DOCKERHUB_USERNAME }}/notification-service:latest
+    image: ${DOCKER_USERNAME}/notification-service:latest
     # build: ./notification-service
     container_name: notification-service
     hostname: notification-service
@@ -126,7 +126,7 @@ services:
       retries: 3
 
   frontend:
-    image: ${{ secrets.DOCKERHUB_USERNAME }}/frontend:latest
+    image: ${DOCKER_USERNAME}/frontend:latest
     # build: ./studyonic-frontend
     container_name: frontend
     hostname: frontend

@@ -55,6 +55,8 @@ jobs:
             git reset --hard origin/main
             git pull origin main
 
+            echo "DOCKER_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}" > .env
+
             echo "Logging in to Docker Hub"
             echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
 
