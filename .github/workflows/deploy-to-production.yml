@@ -42,6 +42,7 @@ jobs:
           host: ${{ secrets.PROD_SERVER_HOST }}
           username: ${{ secrets.PROD_SERVER_USERNAME }}
           key: ${{ secrets.PROD_SERVER_SSH_KEY }}
+          command_timeout: 30m
           script: |
             set -e
             export PROJ_DIR=/home/ubuntu/studyonic
