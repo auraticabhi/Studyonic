@@ -131,8 +131,7 @@ services:
     container_name: frontend
     hostname: frontend
     depends_on:
-      api-gateway:
-        condition: service_healthy
+      - api-gateway
     networks: [edtech-network]
     ports:
       - "80:80"
