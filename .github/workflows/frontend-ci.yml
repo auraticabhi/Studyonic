@@ -12,10 +12,32 @@ jobs:
   build-and-push-frontend:
     name: Build and Push Frontend Image
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./studyonic-frontend
     
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: studyonic-frontend/package-lock.json
+
+      - name: Install Dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Update Browserslist DB
+        run: npx update-browserslist-db@latest
+
+      - name: Build Production Application
+        env:
+          NODE_OPTIONS: "--max-old-space-size=4096"
+        run: npm run build
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
