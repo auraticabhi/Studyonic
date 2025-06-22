@@ -50,7 +50,8 @@ services:
   # APPLICATION SERVICES
   
   api-gateway:
-    build: ./api-gateway
+    image: ${{ secrets.DOCKERHUB_USERNAME }}/api-gateway:latest 
+    # build: ./api-gateway
     container_name: api-gateway
     hostname: api-gateway
     depends_on: [user-service, course-service, payment-service, notification-service]
@@ -65,7 +66,8 @@ services:
       retries: 3
 
   user-service:
-    build: ./user-service
+    image: ${{ secrets.DOCKERHUB_USERNAME }}/user-service:latest
+    # build: ./user-service
     container_name: user-service
     hostname: user-service
     depends_on: [kafka, redis]
@@ -79,7 +81,8 @@ services:
       retries: 3
     
   course-service:
-    build: ./course-service
+    image: ${{ secrets.DOCKERHUB_USERNAME }}/course-service:latest
+    # build: ./course-service
     container_name: course-service
     hostname: course-service
     depends_on: [kafka, redis]
@@ -93,7 +96,8 @@ services:
       retries: 3
       
   payment-service:
-    build: ./payment-service
+    image: ${{ secrets.DOCKERHUB_USERNAME }}/payment-service:latest
+    # build: ./payment-service
     container_name: payment-service
     hostname: payment-service
     depends_on: [kafka]
@@ -107,7 +111,8 @@ services:
       retries: 3
       
   notification-service:
-    build: ./notification-service
+    image: ${{ secrets.DOCKERHUB_USERNAME }}/notification-service:latest
+    # build: ./notification-service
     container_name: notification-service
     hostname: notification-service
     depends_on: [kafka]
@@ -121,9 +126,13 @@ services:
       retries: 3
 
   frontend:
-    build: ./studyonic-frontend
+    image: ${{ secrets.DOCKERHUB_USERNAME }}/frontend:latest
+    # build: ./studyonic-frontend
     container_name: frontend
-    depends_on: [api-gateway]
+    hostname: frontend
+    depends_on:
+      api-gateway:
+        condition: service_healthy
     networks: [edtech-network]
     ports:
       - "80:80"
