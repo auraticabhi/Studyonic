@@ -34,6 +34,7 @@ jobs:
           push: true
           build-args: |
             REACT_APP_BASE_URL=http://${{ secrets.PROD_SERVER_HOST }}:8000/api/v1
+            REACT_APP_RAZORPAY_KEY=${{ secrets.RAZORPAY_KEY }}
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/frontend:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/frontend:${{ github.sha }}
