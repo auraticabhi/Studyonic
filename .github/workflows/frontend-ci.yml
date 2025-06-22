@@ -32,6 +32,8 @@ jobs:
           context: ./studyonic-frontend
           file: ./studyonic-frontend/Dockerfile
           push: true
+          build-args: |
+            REACT_APP_BASE_URL=http://${{ secrets.PROD_SERVER_HOST }}:8000/api/v1
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/frontend:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/frontend:${{ github.sha }}
