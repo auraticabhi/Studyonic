@@ -2,11 +2,11 @@ const { Kafka } = require('kafkajs');
 require('dotenv').config();
 
 const kafka = new Kafka({
-  clientId: process.env.KAFKA_CLIENT_ID,
+  clientId: 'notification-service',
   brokers: [process.env.KAFKA_BROKERS],
 });
 
-const consumer = kafka.consumer({ groupId: process.env.KAFKA_GROUP_ID });
+const consumer = kafka.consumer({ groupId: 'notification-service-group' });
 
 const connectConsumer = async () => {
   await consumer.connect();
