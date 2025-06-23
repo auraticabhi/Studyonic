@@ -16,6 +16,13 @@ app.use(rateLimiter);
 app.use(express.json()); 
 app.use(cookieParser());
 
+app.get('/health', (req, res) => {
+    res.status(200).json({
+        status: 'UP',
+        timestamp: new Date().toISOString()
+    });
+});
+
 // Service Targets
 const USER_SERVICE = process.env.USER_SERVICE_URL;
 const COURSE_SERVICE = process.env.COURSE_SERVICE_URL;
@@ -224,13 +231,6 @@ app.use(auth, (req, res, next) => {
 // Fallback for any route not matched by the above rules
 app.use((req, res) => {
     res.status(404).json({ success: false, message: `Route not found on API Gateway: ${req.method} ${req.originalUrl}` });
-});
-
-app.get('/health', (req, res) => {
-    res.status(200).json({
-        status: 'UP',
-        timestamp: new Date().toISOString()
-    });
 });
 
 //Server Initialization
