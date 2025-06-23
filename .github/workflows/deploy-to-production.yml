@@ -55,12 +55,6 @@ jobs:
             git reset --hard origin/main
             git pull origin main
 
-            echo "Creating Docker Compose environment file on server"
-            cat > .env <<- EOM
-            DOCKER_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
-            PROD_SERVER_HOST=${{ secrets.PROD_SERVER_HOST }}
-            EOM
-
             echo "DOCKER_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}" > .env
 
             echo "Logging in to Docker Hub"
