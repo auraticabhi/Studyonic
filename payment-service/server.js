@@ -6,7 +6,7 @@ const cors = require("cors");
 const routes = require("./routes/routes");
 const { connectProducer } = require('./config/kafka');
 
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 8003;
 
 // Connect Kafka Producer on start
 connectProducer();

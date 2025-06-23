@@ -1,6 +1,6 @@
 services:
   # INFRASTRUCTURE SERVICES
-  
+
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.0
     container_name: zookeeper
@@ -14,24 +14,48 @@ services:
       - zookeeper-data:/var/lib/zookeeper/data
       - zookeeper-logs:/var/lib/zookeeper/log
     restart: unless-stopped
+    healthcheck: # <<< ADDED: Zookeeper Health Check
+      test: ["CMD", "sh", "-c", "echo ruok | nc localhost 2181"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
   kafka:
     image: confluentinc/cp-kafka:7.4.0
     container_name: kafka
     hostname: kafka
-    depends_on: [zookeeper]
+    depends_on:
+      zookeeper:
+        condition: service_healthy
     networks: [edtech-network]
-    ports: ["9092:9092", "29092:29092"]
+    ports:
+      - "9092:9092"
+      - "29092:29092"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:29092,EXTERNAL://localhost:9092
-      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,EXTERNAL://0.0.0.0:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://${KAFKA_EXTERNAL_HOST}:29092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 3000
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      KAFKA_HEAP_OPTS: "-Xmx1G -Xms1G"
+      KAFKA_LOG_RETENTION_HOURS: 168
+      KAFKA_LOG_SEGMENT_BYTES: 1073741824
+      KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: 300000
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1 # Fix transaction mismatch
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+    volumes:
+      - kafka-data:/var/lib/kafka/data
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics --bootstrap-server localhost:9092 --list"]
+      interval: 15s
+      timeout: 10s
+      retries: 8
+      start_period: 45s
 
   redis:
     image: redis:7-alpine
@@ -42,88 +66,116 @@ services:
     command: redis-server --save 60 1 --loglevel warning
     volumes:
       - redis-data:/data
-    # healthcheck:
-    #   test: ["CMD", "redis-cli", "ping"]
-    #   interval: 5s
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
     restart: unless-stopped
 
   # APPLICATION SERVICES
-  
+
   api-gateway:
     image: ${DOCKER_USERNAME}/api-gateway:latest
     # build: ./api-gateway
     container_name: api-gateway
     hostname: api-gateway
-    depends_on: [user-service, course-service, payment-service, notification-service]
+    depends_on:
+      user-service:
+        condition: service_healthy
+      course-service:
+        condition: service_healthy
+      payment-service:
+        condition: service_healthy
+      notification-service:
+        condition: service_healthy
     networks: [edtech-network]
     ports: ["8000:8000"]
     env_file: [".env.prod"]
     restart: always
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    
   user-service:
     image: ${DOCKER_USERNAME}/user-service:latest
     # build: ./user-service
     container_name: user-service
     hostname: user-service
-    depends_on: [kafka, redis]
+    depends_on:
+      kafka:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks: [edtech-network]
     env_file: [".env.prod"]
     restart: always
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
     
   course-service:
     image: ${DOCKER_USERNAME}/course-service:latest
     # build: ./course-service
     container_name: course-service
     hostname: course-service
-    depends_on: [kafka, redis]
+    depends_on:
+      kafka:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks: [edtech-network]
     env_file: [".env.prod"]
     restart: always
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
       
   payment-service:
     image: ${DOCKER_USERNAME}/payment-service:latest
     # build: ./payment-service
     container_name: payment-service
     hostname: payment-service
-    depends_on: [kafka]
+    depends_on:
+      kafka:
+        condition: service_healthy
     networks: [edtech-network]
     env_file: [".env.prod"]
     restart: always
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
       
   notification-service:
     image: ${DOCKER_USERNAME}/notification-service:latest
     # build: ./notification-service
     container_name: notification-service
     hostname: notification-service
-    depends_on: [kafka]
+    depends_on:
+      kafka:
+        condition: service_healthy
     networks: [edtech-network]
     env_file: [".env.prod"]
     restart: always
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8004/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
   frontend:
     image: ${DOCKER_USERNAME}/frontend:latest
@@ -131,7 +183,8 @@ services:
     container_name: frontend
     hostname: frontend
     depends_on:
-      - api-gateway
+      api-gateway:
+        condition: service_healthy
     networks: [edtech-network]
     ports:
       - "80:80"
