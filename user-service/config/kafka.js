@@ -1,9 +1,20 @@
-const { Kafka } = require('kafkajs');
+const { Kafka, logLevel } = require('kafkajs');
 require('dotenv').config();
 
+// const kafka = new Kafka({
+//   clientId: 'user-service',
+//   brokers: [process.env.KAFKA_BROKERS || 'localhost:9092'],
+// });
+
 const kafka = new Kafka({
-  clientId: 'user-service',
-  brokers: [process.env.KAFKA_BROKERS || 'localhost:9092'],
+    logLevel: logLevel.INFO,
+    brokers: [process.env.KAFKA_BOOTSTRAP_SERVER],
+    ssl: true,
+    sasl: {
+        mechanism: 'plain',
+        username: process.env.KAFKA_API_KEY,
+        password: process.env.KAFKA_API_SECRET
+    },
 });
 
 const producer = kafka.producer();

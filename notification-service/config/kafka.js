@@ -1,9 +1,15 @@
-const { Kafka } = require('kafkajs');
+const { Kafka, logLevel } = require('kafkajs');
 require('dotenv').config();
 
 const kafka = new Kafka({
-  clientId: 'notification-service',
-  brokers: [process.env.KAFKA_BROKERS],
+    logLevel: logLevel.INFO,
+    brokers: [process.env.KAFKA_BOOTSTRAP_SERVER],
+    ssl: true,
+    sasl: {
+        mechanism: 'plain',
+        username: process.env.KAFKA_API_KEY,
+        password: process.env.KAFKA_API_SECRET
+    },
 });
 
 const consumer = kafka.consumer({ groupId: 'notification-service-group' });
