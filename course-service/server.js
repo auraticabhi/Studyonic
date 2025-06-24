@@ -24,12 +24,11 @@ connectRedis();
 // Connect to Cloudinary
 cloudinaryConnect();
 
-// Wrap Kafka initialization in an async function or use .then/.catch
 async function startKafka() {
     try {
-        await initializeKafkaConsumer(); // Connects and subscribes
-        await runConsumer(messageHandler); // Starts the message processing loop
-        // Add listeners for graceful shutdown
+        await initializeKafkaConsumer(); // Connect and subscribe
+        await runConsumer(messageHandler); // Start the message processing loop
+        // listeners for graceful shutdown
         process.on('SIGTERM', async () => {
             console.log('Received SIGTERM. Disconnecting Kafka consumer...');
             await disconnectConsumer();

@@ -19,8 +19,8 @@ const Dashboard = () => {
 
   return (
     <div>
-    <div className="md:hidden text-white font-medium flex items-center justify-center my-8">Please Switch to PC to view this page :-</div>
-    <div className="hidden md:block">
+    <div className="sm:hidden text-white font-medium flex items-center justify-center my-8">Please Switch to PC to view this page :-</div>
+    <div className="hidden sm:block">
     <div className="relative flex min-h-[calc(100vh-3.5rem)]" >
         <Sidebar/>
         <div className="h-[calc(100vh-3.5rem)] flex-1 overflow-auto">

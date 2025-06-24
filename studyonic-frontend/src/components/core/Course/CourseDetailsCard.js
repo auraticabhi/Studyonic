@@ -20,7 +20,7 @@ function CourseDetailsCard({course, setConfirmationModal, handleBuyCourse}) {
     const {
         thumbnail: ThumbnailImage,
         price: CurrentPrice,
-
+        instructions,
     } = course;
 
 
@@ -48,6 +48,30 @@ function CourseDetailsCard({course, setConfirmationModal, handleBuyCourse}) {
         copy(window.location.href);
         toast.success("Link Copied to Clipboard")
     }
+
+    const getFormattedInstructions = () => {
+      if (!instructions || instructions.length === 0) {
+        return [];
+      }
+   
+      let formatted = [];
+      instructions.forEach(item => {
+        try {
+          const parsed = JSON.parse(item);
+          if (Array.isArray(parsed)) {
+            formatted = formatted.concat(parsed);
+          } else {
+            formatted.push(item);
+          }
+        } catch (e) {
+          formatted.push(item);
+        }
+      });
+   
+      return formatted.filter(i => i && i.trim().toLowerCase() !== 'na');
+    };
+
+    const formattedInstructions = getFormattedInstructions();
 
     return (
         <div
@@ -95,12 +119,16 @@ function CourseDetailsCard({course, setConfirmationModal, handleBuyCourse}) {
                 </p>
                 <div className="flex flex-col gap-3 text-sm text-caribbeangreen-100">
                     {
-                        course.instructions.map((item, index)=> (
-                            <p key={index} className='flex gap-2'>
+                      formattedInstructions.length > 0 ? (
+                        formattedInstructions.map((item, index) => (
+                          <p key={index} className='flex gap-2 items-center'>
                             <BsFillCaretRightFill />
-                                <span>{item}</span>
-                            </p>
+                            <span>{item}</span>
+                          </p>
                         ))
+                      ) : (
+                        <p className='text-richblack-200'>No specific instructions provided.</p>
+                      )
                     }
                 </div>
             </div>

@@ -1,20 +1,33 @@
-import { FiTrash2 } from "react-icons/fi"
-import { useDispatch, useSelector } from "react-redux"
-import { useNavigate } from "react-router-dom"
+import { FiTrash2 } from "react-icons/fi";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react"; // Import useState
 
-import { deleteProfile } from "../../../../services/operations/SettingsAPI"
+import { deleteProfile } from "../../../../services/operations/SettingsAPI";
+import ConfirmationModal from "../../../common/ConfirmationModal"; // Adjust path if necessary
 
 export default function DeleteAccount() {
-  const { token } = useSelector((state) => state.auth)
-  const dispatch = useDispatch()
-  const navigate = useNavigate()
+  const { token } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  // State to manage the confirmation modal
+  const [confirmationModal, setConfirmationModal] = useState(null);
 
   async function handleDeleteAccount() {
-    try {
-      dispatch(deleteProfile(token, navigate))
-    } catch (error) {
-      console.log("ERROR MESSAGE - ", error.message)
-    }
+    // Show the confirmation modal instead of directly calling deleteProfile
+    setConfirmationModal({
+      text1: "Are you sure?",
+      text2: "Your account and all associated data will be permanently deleted.",
+      btn1Text: "Delete Account",
+      btn2Text: "Cancel",
+      btn1Handler: () => {
+        // Only proceed with deletion if confirmed
+        dispatch(deleteProfile(token, navigate));
+        setConfirmationModal(null); // Close modal after action
+      },
+      btn2Handler: () => setConfirmationModal(null), // Close modal on cancel
+    });
   }
 
   return (
@@ -31,18 +44,21 @@ export default function DeleteAccount() {
             <p>Would you like to delete account?</p>
             <p>
               This account may contain Paid Courses. Deleting your account is
-              permanent and will remove all the contain associated with it.
+              permanent and will remove all the content associated with it.
             </p>
           </div>
           <button
             type="button"
             className="w-fit cursor-pointer italic text-pink-300"
-            onClick={handleDeleteAccount}
+            onClick={handleDeleteAccount} // This will now open the modal
           >
             I want to delete my account.
           </button>
         </div>
       </div>
+
+      {/* Render the ConfirmationModal if confirmationModal state is not null */}
+      {confirmationModal && <ConfirmationModal modalData={confirmationModal} />}
     </>
-  )
+  );
 }
