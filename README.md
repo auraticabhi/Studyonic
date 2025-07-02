@@ -10,6 +10,8 @@
 
 The platform is built on a decoupled microservice architecture. Services communicate both synchronously via a central API Gateway and asynchronously through a Kafka event bus, ensuring high throughput and resilience. Redis provides a high-performance caching and rate-limiting layer. The entire system is containerized with Docker and deployed automatically to AWS EC2.
 
+<div align="center" ><img src="https://res.cloudinary.com/df6k7nqy7/image/upload/v1751478748/snfinal_2_vdyz9c.png" alt="architecture_diagram"></div>
+
 ---
 
 ## 🛠️ Tech Stack & Key Concepts
